@@ -67,12 +67,18 @@ export default async function DashboardPage() {
           </p>
         </div>
         
-        <form action="/auth/signout" method="post">
-          <button type="submit" className="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors">
-            <LogOut className="w-4 h-4" />
-            Déconnexion
-          </button>
-        </form>
+        <div className="flex items-center gap-3">
+          <Link href="/espace-clinique/dashboard/medecins" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 font-medium hover:bg-cyan-100 dark:hover:bg-cyan-900/40 transition-colors">
+            <Users className="w-4 h-4" />
+            Gérer les médecins
+          </Link>
+          <form action="/auth/signout" method="post">
+            <button type="submit" className="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors">
+              <LogOut className="w-4 h-4" />
+              Déconnexion
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* Stats Cards */}

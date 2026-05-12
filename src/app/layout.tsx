@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Toaster } from "react-hot-toast";
 
 export default function RootLayout({
   children,
@@ -31,6 +32,25 @@ export default function RootLayout({
       className={`${inter.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors duration-300">
+        <Toaster 
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#fff',
+              color: '#334155',
+              boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+              borderRadius: '1rem',
+              fontWeight: 500,
+            },
+            success: {
+              iconTheme: {
+                primary: '#0891b2',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
         <Navbar />
         <main className="flex-1 pt-16 flex flex-col">
           {children}
