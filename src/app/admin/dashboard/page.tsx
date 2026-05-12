@@ -88,7 +88,12 @@ export default async function AdminDashboard() {
                     </span>
                   </td>
                   <td className="p-4 text-right">
-                    <button className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium text-sm">Éditer</button>
+                    <Link 
+                      href={`/admin/dashboard/cliniques/${clinique.id}/editer`}
+                      className="text-indigo-600 dark:text-indigo-400 font-medium text-sm px-3 py-1 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors inline-block"
+                    >
+                      Éditer
+                    </Link>
                   </td>
                 </tr>
               ))}

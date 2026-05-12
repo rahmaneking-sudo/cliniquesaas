@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Users, CalendarCheck, Clock, LogOut } from "lucide-react";
 import Link from "next/link";
+import ReservationActions from "@/components/ReservationActions";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
     .select("*, medecins(nom)")
     .eq("clinic_id", clinique.id)
     .eq("date_rdv", today)
+    .neq("statut", "termine")
     .order("heure_rdv", { ascending: true });
 
   return (
@@ -118,9 +120,9 @@ export default async function DashboardPage() {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Rendez-vous du jour</h2>
-          <button className="px-4 py-2 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 text-sm font-medium rounded-lg hover:bg-cyan-100 dark:hover:bg-cyan-900/40 transition-colors">
+          <Link href="/espace-clinique/dashboard/reservations" className="px-4 py-2 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 text-sm font-medium rounded-lg hover:bg-cyan-100 dark:hover:bg-cyan-900/40 transition-colors">
             Voir l'agenda complet
-          </button>
+          </Link>
         </div>
         
         <div className="p-0">
@@ -141,19 +143,33 @@ export default async function DashboardPage() {
                       <h4 className="font-bold text-slate-900 dark:text-white">{rdv.nom_patient}</h4>
                       <p className="text-sm text-slate-500 mt-1">Consultation avec : <span className="font-medium text-slate-700 dark:text-slate-300">Dr. {rdv.medecins?.nom}</span></p>
                       <div className="flex gap-2 mt-2">
-                        <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-md font-medium">Confirmé</span>
+                        <span className={`text-xs px-2 py-1 rounded-md font-medium ${rdv.statut === 'reporte' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                          {rdv.statut === 'reporte' ? 'Reporté' : 'Confirmé'}
+                        </span>
                         <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-md">WhatsApp: {rdv.whatsapp_patient}</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
-                    <button className="px-3 py-1.5 text-sm font-medium border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                      Reporter
-                    </button>
-                    <button className="px-3 py-1.5 text-sm font-medium bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors">
-                      Terminer
-                    </button>
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
+                    <a 
+                      href={`https://wa.me/${rdv.whatsapp_patient?.replace(/\D/g, '')}?text=${encodeURIComponent(`Bonjour ${rdv.nom_patient},\n\nVotre RDV avec le Dr. ${rdv.medecins?.nom} le ${rdv.date_rdv} à ${rdv.heure_rdv.substring(0,5)} est bien confirmé.\n\nMerci de nous contacter en cas d'empêchement.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 text-sm font-medium bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-1"
+                    >
+                      WhatsApp
+                    </a>
+                    <ReservationActions 
+                      id={rdv.id}
+                      nomPatient={rdv.nom_patient}
+                      nomMedecin={rdv.medecins?.nom || ""}
+                      dateRdv={rdv.date_rdv}
+                      heureRdv={rdv.heure_rdv.substring(0,5)}
+                      whatsappPatient={rdv.whatsapp_patient || ""}
+                      cliniqueSlug={clinique?.slug || ""}
+                      cliniqueNom={clinique?.nom || ""}
+                    />
                   </div>
                 </div>
               ))}

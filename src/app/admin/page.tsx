@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Shield, Mail, Lock, AlertCircle, Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
@@ -14,6 +14,20 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+
+  // Rediriger automatiquement si l'utilisateur est déjà connecté
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.push("/admin/dashboard");
+      } else {
+        setIsCheckingSession(false);
+      }
+    };
+    checkSession();
+  }, [router, supabase]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +54,14 @@ export default function AdminLogin() {
       router.refresh();
     }
   };
+
+  if (isCheckingSession) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-4 bg-slate-950">
+        <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-4 bg-slate-950">

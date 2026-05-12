@@ -1,15 +1,29 @@
 import { createClient } from "@/utils/supabase/server";
 import { MapPin, Star, Building2 } from "lucide-react";
 import Link from "next/link";
+import SearchBar from "@/components/SearchBar";
 
-export default async function CliniquesPage() {
+export const metadata = {
+  title: "Annuaire des Cliniques | RDV Santé",
+  description: "Recherchez et trouvez la clinique ou le médecin idéal au Sénégal. Prenez rendez-vous en ligne gratuitement.",
+};
+
+export default async function CliniquesPage({ searchParams }: { searchParams: { q?: string } }) {
+  const { q } = await searchParams;
   const supabase = await createClient();
   
-  // Fetch active clinics
-  const { data: cliniques, error } = await supabase
+  let query = supabase
     .from("cliniques")
     .select("*")
+    .neq("statut_abonnement", "suspendu")
     .order("note_moyenne", { ascending: false });
+
+  if (q) {
+    // Recherche par nom ou ville
+    query = query.or(`nom.ilike.%${q}%,ville.ilike.%${q}%,quartier.ilike.%${q}%`);
+  }
+
+  const { data: cliniques, error } = await query;
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-12 relative z-10">
@@ -17,9 +31,10 @@ export default async function CliniquesPage() {
         <h1 className="text-4xl md:text-5xl font-extrabold font-outfit text-slate-900 dark:text-white mb-4">
           Annuaire des Cliniques
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl">
+        <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mb-8">
           Découvrez notre réseau de cliniques partenaires à travers le Sénégal et réservez votre consultation en quelques clics.
         </p>
+        <SearchBar />
       </div>
 
       {error && (

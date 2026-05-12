@@ -25,7 +25,8 @@ export default function EditerClinique() {
     telephone: "",
     email: "",
     description: "",
-    statut_abonnement: "gratuit"
+    statut_abonnement: "essai_gratuit",
+    date_fin_abonnement: ""
   });
 
   useEffect(() => {
@@ -48,7 +49,8 @@ export default function EditerClinique() {
             telephone: data.telephone || "",
             email: data.email || "",
             description: data.description || "",
-            statut_abonnement: data.statut_abonnement || "gratuit"
+            statut_abonnement: data.statut_abonnement || "essai_gratuit",
+            date_fin_abonnement: data.date_fin_abonnement ? new Date(data.date_fin_abonnement).toISOString().split('T')[0] : ""
           });
         }
       } catch (err: any) {
@@ -107,7 +109,8 @@ export default function EditerClinique() {
         telephone: formData.telephone,
         email: formData.email,
         description: formData.description,
-        statut_abonnement: formData.statut_abonnement
+        statut_abonnement: formData.statut_abonnement,
+        date_fin_abonnement: formData.date_fin_abonnement || null
       })
       .eq("id", id);
 
@@ -250,17 +253,29 @@ export default function EditerClinique() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Abonnement SaaS</label>
-          <select 
-            value={formData.statut_abonnement}
-            onChange={(e) => setFormData({...formData, statut_abonnement: e.target.value})}
-            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-indigo-700 dark:text-indigo-400"
-          >
-            <option value="gratuit">Gratuit (Limité)</option>
-            <option value="premium">Premium (Standard)</option>
-            <option value="entreprise">Entreprise (VIP)</option>
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Abonnement SaaS</label>
+            <select 
+              value={formData.statut_abonnement}
+              onChange={(e) => setFormData({...formData, statut_abonnement: e.target.value})}
+              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-indigo-700 dark:text-indigo-400"
+            >
+              <option value="essai_gratuit">Essai Gratuit (1 mois)</option>
+              <option value="actif">Actif (Payé)</option>
+              <option value="suspendu">Suspendu (Impayé)</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Date de fin d'abonnement / d'essai</label>
+            <input 
+              type="date" 
+              required
+              value={formData.date_fin_abonnement}
+              onChange={(e) => setFormData({...formData, date_fin_abonnement: e.target.value})}
+              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
         </div>
 
         <div className="flex justify-end pt-4">

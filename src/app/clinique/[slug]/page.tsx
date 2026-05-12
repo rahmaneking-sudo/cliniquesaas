@@ -2,6 +2,20 @@ import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 import { MapPin, Phone, Mail, Star, Users, CalendarCheck } from "lucide-react";
 import Link from "next/link";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data: clinique } = await supabase.from("cliniques").select("nom, description, ville").eq("slug", slug).single();
+  
+  if (!clinique) return { title: "Clinique introuvable | RDV Santé" };
+  
+  return {
+    title: `${clinique.nom} - ${clinique.ville} | RDV Santé`,
+    description: clinique.description || `Prenez rendez-vous en ligne avec ${clinique.nom} à ${clinique.ville}.`,
+  };
+}
 
 export default async function CliniqueProfile({ params }: { params: { slug: string } }) {
   const { slug } = await params;
@@ -14,7 +28,7 @@ export default async function CliniqueProfile({ params }: { params: { slug: stri
     .eq("slug", slug)
     .single();
 
-  if (error || !clinique) {
+  if (error || !clinique || clinique.statut_abonnement === "suspendu") {
     notFound();
   }
 

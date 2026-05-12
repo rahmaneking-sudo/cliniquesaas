@@ -37,6 +37,26 @@ export default function ReservationForm({ medecin }: ReservationFormProps) {
     setLoading(true);
     setError("");
 
+    // 1. Vérifier si le médecin est absent ce jour-là
+    const { data: absences, error: absError } = await supabase
+      .from("absences")
+      .select("*")
+      .eq("medecin_id", medecin.id)
+      .lte("date_debut", formData.date_rdv)
+      .gte("date_fin", formData.date_rdv);
+
+    if (absError && absError.code !== "42P01") {
+      // Ignorer l'erreur si la table n'existe pas encore (fallback)
+      console.error(absError);
+    }
+
+    if (absences && absences.length > 0) {
+      setError(`Désolé, le Dr. ${medecin.nom} est absent(e) à cette date. Veuillez choisir un autre jour.`);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Si pas absent, on enregistre la réservation
     const { error: insertError } = await supabase.from("reservations").insert([
       {
         medecin_id: medecin.id,
@@ -72,7 +92,7 @@ export default function ReservationForm({ medecin }: ReservationFormProps) {
         </div>
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Rendez-vous Confirmé !</h2>
         <p className="text-slate-600 dark:text-slate-400 mb-8">
-          Votre demande de consultation avec le Dr. {medecin.nom} le {formData.date_rdv} à {formData.heure_rdv} a bien été enregistrée. Vous recevrez une notification WhatsApp prochainement.
+          Votre consultation avec le Dr. {medecin.nom} le {formData.date_rdv} à {formData.heure_rdv} a bien été enregistrée auprès de la clinique <strong>{medecin.cliniques.nom}</strong>. La clinique vous contactera en cas de besoin.
         </p>
         <Link href="/">
           <button className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-medium rounded-xl transition-colors shadow-md">
