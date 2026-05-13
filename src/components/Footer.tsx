@@ -43,8 +43,8 @@ export default function Footer() {
             <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
               <li>Dakar, Sénégal</li>
-              <li>contact@rdvsante.sn</li>
-              <li>+221 77 000 00 00</li>
+              <li><a href="https://wa.me/221777185723" className="hover:text-emerald-600 transition-colors">+221 77 718 57 23</a></li>
+              <li><a href="tel:+221711696897" className="hover:text-emerald-600 transition-colors">+221 71 169 68 97</a></li>
             </ul>
           </div>
         </div>
