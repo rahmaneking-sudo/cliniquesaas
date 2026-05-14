@@ -1,9 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
-import { ArrowLeft, Calendar, Clock, UserX } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, UserX, Users } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AbsencesForm from "./AbsencesForm";
 import HorairesForm from "./HorairesForm";
+import QuotaForm from "./QuotaForm";
 import { Clock8 } from "lucide-react";
 export default async function MedecinAgenda({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -138,6 +139,20 @@ export default async function MedecinAgenda({ params }: { params: Promise<{ id: 
             </div>
             
             <HorairesForm medecinId={medecin.id} horairesInitiaux={medecin.horaires} />
+          </div>
+
+          {/* Quota journalier */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6">
+            <div className="flex items-center gap-2 mb-6 text-amber-600 dark:text-amber-400">
+              <Users className="w-6 h-6" />
+              <h2 className="text-xl font-bold">Quota journalier</h2>
+            </div>
+            
+            <QuotaForm 
+              medecinId={medecin.id} 
+              medecinNom={medecin.nom} 
+              currentQuota={medecin.max_patients_par_jour} 
+            />
           </div>
 
           {/* Gestion des absences */}

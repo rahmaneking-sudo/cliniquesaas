@@ -12,32 +12,57 @@ export default async function DashboardPage() {
     redirect("/espace-clinique");
   }
 
-  // Get clinic info for this user
-  const { data: utilisateurClinique } = await supabase
-    .from("utilisateurs_clinique")
-    .select("clinic_id, role")
-    .eq("id", user.id)
-    .single();
+  // Déterminer le clinic_id selon le rôle (admin ou secrétaire)
+  const isAdmin = user.email === "rahmaneking@gmail.com";
+  let clinicId: string | null = null;
+  let userRole = "secrétaire";
 
-  if (!utilisateurClinique || !utilisateurClinique.clinic_id) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-red-50 text-red-700 p-6 rounded-xl border border-red-200 text-center max-w-md">
-          <h2 className="text-xl font-bold mb-2">Compte non configuré</h2>
-          <p>Votre compte n'est lié à aucune clinique. Veuillez contacter l'administrateur système.</p>
-          <form action="/auth/signout" method="post" className="mt-4">
-            <button type="submit" className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium">Se déconnecter</button>
-          </form>
+  if (isAdmin) {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    clinicId = cookieStore.get("admin_clinic_id")?.value || null;
+    userRole = "admin";
+
+    if (!clinicId) {
+      return (
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-indigo-50 text-indigo-700 p-6 rounded-xl border border-indigo-200 text-center max-w-md">
+            <h2 className="text-xl font-bold mb-2">Mode Super-Admin</h2>
+            <p>Veuillez sélectionner une clinique dans la barre violette en haut pour afficher son tableau de bord.</p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+  } else {
+    const { data: utilisateurClinique } = await supabase
+      .from("utilisateurs_clinique")
+      .select("clinic_id, role")
+      .eq("id", user.id)
+      .single();
+
+    if (!utilisateurClinique || !utilisateurClinique.clinic_id) {
+      return (
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-red-50 text-red-700 p-6 rounded-xl border border-red-200 text-center max-w-md">
+            <h2 className="text-xl font-bold mb-2">Compte non configuré</h2>
+            <p>Votre compte n'est lié à aucune clinique. Veuillez contacter l'administrateur système.</p>
+            <form action="/auth/signout" method="post" className="mt-4">
+              <button type="submit" className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium">Se déconnecter</button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    clinicId = utilisateurClinique.clinic_id;
+    userRole = utilisateurClinique.role;
   }
 
   // Fetch clinic details
   const { data: clinique } = await supabase
     .from("cliniques")
     .select("*")
-    .eq("id", utilisateurClinique.clinic_id)
+    .eq("id", clinicId)
     .single();
 
   // Fetch doctors count
@@ -65,7 +90,7 @@ export default async function DashboardPage() {
             Espace Pro
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
-            {clinique?.nom} — Connecté en tant que {utilisateurClinique.role}
+            {clinique?.nom} — Connecté en tant que {userRole}
           </p>
         </div>
         

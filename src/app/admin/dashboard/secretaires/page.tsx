@@ -33,7 +33,7 @@ export default async function AdminSecretaires() {
           className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-md shadow-indigo-500/20"
         >
           <Plus className="w-5 h-5" />
-          Lier une secrétaire
+          Créer une secrétaire
         </Link>
       </div>
 

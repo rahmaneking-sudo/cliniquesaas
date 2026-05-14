@@ -10,19 +10,40 @@ export default async function ReservationsPage() {
 
   if (!user) redirect("/espace-clinique");
 
-  // Identifier la clinique
-  const { data: uc } = await supabase.from("utilisateurs_clinique").select("clinic_id").eq("id", user.id).single();
-  if (!uc?.clinic_id) redirect("/espace-clinique/dashboard");
+  // Identifier la clinique selon le rôle
+  const isAdmin = user.email === "rahmaneking@gmail.com";
+  let clinicId: string | null = null;
+
+  if (isAdmin) {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    clinicId = cookieStore.get("admin_clinic_id")?.value || null;
+
+    if (!clinicId) {
+      return (
+        <div className="p-8 w-full max-w-7xl mx-auto flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Mode Admin Actif</h2>
+            <p className="text-slate-500">Veuillez sélectionner une clinique dans la barre violette en haut pour voir son agenda.</p>
+          </div>
+        </div>
+      );
+    }
+  } else {
+    const { data: uc } = await supabase.from("utilisateurs_clinique").select("clinic_id").eq("id", user.id).single();
+    if (!uc?.clinic_id) redirect("/espace-clinique/dashboard");
+    clinicId = uc.clinic_id;
+  }
 
   // Récupérer les infos de la clinique (slug + nom)
-  const { data: clinique } = await supabase.from("cliniques").select("slug, nom").eq("id", uc.clinic_id).single();
+  const { data: clinique } = await supabase.from("cliniques").select("slug, nom").eq("id", clinicId).single();
 
   // Récupérer toutes les réservations futures (à partir d'aujourd'hui)
   const today = new Date().toISOString().split('T')[0];
   const { data: reservations } = await supabase
     .from("reservations")
     .select("*, medecins(nom)")
-    .eq("clinic_id", uc.clinic_id)
+    .eq("clinic_id", clinicId)
     .gte("date_rdv", today)
     .neq("statut", "termine")
     .order("date_rdv", { ascending: true })
